@@ -6,6 +6,7 @@
     <title>Расчет амортизации шасси — Единое методическое руководство</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .header-box { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 2rem; border-radius: 0.5rem; margin-bottom: 2rem; }
@@ -45,6 +46,22 @@
                         <div class="col-6 mb-2">
                             <label class="form-label small">P_ст.взл (Н):</label>
                             <input type="number" id="P_st_vzl" class="form-control" value="50000">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Взлетная скорость V_взл (м/с):</label>
+                            <input type="number" id="V_vzl" class="form-control" value="70">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Посадочная скорость V_пос (м/с):</label>
+                            <input type="number" id="V_pos" class="form-control" value="60">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Давление зарядки p0 (МПа):</label>
+                            <input type="number" step="0.1" id="p_0" class="form-control" value="6.0">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Соотношение G0/Gпос:</label>
+                            <input type="number" step="0.01" id="G0_Gpos" class="form-control" value="1.15">
                         </div>
                         <div class="col-6 mb-2">
                             <label class="form-label small">Число колес n_кол:</label>
@@ -102,7 +119,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="fw-bold text-dark m-0">Результаты расчета</h4>
                         <div>
-                            <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Печать / Сохранить в PDF</button>
+                            <button id="export_excel_btn" class="btn btn-outline-success btn-sm" onclick="exportToExcel()" style="display:none;">Выгрузить в Excel</button>
                         </div>
                     </div>
 
@@ -121,6 +138,7 @@
 
     <script>
         let myChart = null;
+        let lastCalculationResults = null;
 
         function toggleInputs() {
             const type = document.getElementById('strut_type').value;
@@ -131,14 +149,18 @@
 
         function getFormData() {
             const type = parseInt(document.getElementById('strut_type').value);
-            let p_0_gas = 0.6e6;
-            if (type == 2) p_0_gas = parseFloat(document.getElementById('p_0_lever').value) * 1e6;
-            if (type == 3) p_0_gas = parseFloat(document.getElementById('p_0_ext').value) * 1e6;
+            let p_0_gas = parseFloat(document.getElementById('p_0').value) * 1e6;
+            if (type == 2 && document.getElementById('p_0_lever').value) p_0_gas = parseFloat(document.getElementById('p_0_lever').value) * 1e6;
+            if (type == 3 && document.getElementById('p_0_ext').value) p_0_gas = parseFloat(document.getElementById('p_0_ext').value) * 1e6;
 
             return {
                 strut_type: type,
                 P_st_pos: parseFloat(document.getElementById('P_st_pos').value),
                 P_st_vzl: parseFloat(document.getElementById('P_st_vzl').value),
+                V_vzl: parseFloat(document.getElementById('V_vzl').value || 70),
+                V_pos: parseFloat(document.getElementById('V_pos').value || 60),
+                p_0: parseFloat(document.getElementById('p_0').value || 6.0),
+                G0_Gpos: parseFloat(document.getElementById('G0_Gpos').value || 1.15),
                 n_wheels: parseFloat(document.getElementById('n_wheels').value),
                 A_star: parseFloat(document.getElementById('A_star').value),
                 eta: parseFloat(document.getElementById('eta').value),
@@ -155,7 +177,7 @@
             const P_st_pos = params.P_st_pos;
             const P_st_vzl = params.P_st_vzl;
             const A_star = params.A_star;
-            const G_vzl_G_pos = 1.15;
+            const G_vzl_G_pos = params.G0_Gpos || 1.15;
             const eta = params.eta;
             const K = params.K;
             const k_gas = 1.2;
@@ -227,6 +249,7 @@
             ];
 
             return {
+                params: params,
                 strut_type: strut_type,
                 strut_name: strut_names[strut_type - 1],
                 steps: {
@@ -274,12 +297,14 @@
                 const data = await res.json();
                 if (data.status === 'success') {
                     resData = data.data;
+                    resData.params = payload;
                 } else {
                     resData = calculateLandingGearLocal(payload);
                 }
             } catch (e) {
                 resData = calculateLandingGearLocal(payload);
             }
+            lastCalculationResults = resData;
             renderResults(resData);
         }
 
@@ -324,6 +349,7 @@
 
             document.getElementById('results_container').innerHTML = html;
             document.getElementById('chart_container').style.display = 'block';
+            document.getElementById('export_excel_btn').style.display = 'inline-block';
 
             renderChart(res.polytrope_points);
         }
@@ -352,6 +378,63 @@
                     }
                 }
             });
+        }
+
+        function exportToExcel() {
+            if (!lastCalculationResults) return;
+            const res = lastCalculationResults;
+            const params = res.params || {};
+            const steps = res.steps;
+
+            const wb = XLSX.utils.book_new();
+
+            // Sheet 1: Summary / Results
+            const summaryData = [
+                ["Параметр / Результат", "Значение", "Ед. изм."],
+                ["Тип стойки шасси", res.strut_name, ""],
+                ["", "", ""],
+                ["--- ИСХОДНЫЕ ДАННЫЕ ---", "", ""],
+                ["P_ст.пос", params.P_st_pos, "Н"],
+                ["P_ст.взл", params.P_st_vzl, "Н"],
+                ["Взлетная скорость V_взл", params.V_vzl, "м/с"],
+                ["Посадочная скорость V_пос", params.V_pos, "м/с"],
+                ["Давление зарядки p0", params.p_0, "МПа"],
+                ["Соотношение G0/Gпос", params.G0_Gpos, ""],
+                ["Число колес n_кол", params.n_wheels, ""],
+                ["Нормируемая работа A*", params.A_star, "Дж"],
+                ["Коэффициент полноты η", params.eta, ""],
+                ["Коэффициент нелинейности K", params.K, ""],
+                ["", "", ""],
+                ["--- РЕЗУЛЬТАТЫ РАСЧЕТА ---", "", ""],
+                ["Макс. работа A_max", steps.step1.A_max_J, "Дж"],
+                ["Ход пневматика", steps.step2_3.delta_pm_mm, "мм"],
+                ["Ход амортизатора", steps.step2_3.delta_am_mm, "мм"],
+                ["Макс. усилие P_пм^max", steps.step2_3.P_pm_max_kN, "кН"],
+                ["Эксплуатационная перегрузка n_y^расч", steps.step2_3.n_y_calc, ""],
+                ["Соответствие АП-25 (ny <= 3.5)", steps.step2_3.ap25_passed ? "Да" : "Нет", ""],
+                ["Диаметр штока d_шток", steps.step4.d_rod_mm, "мм"],
+                ["Диаметр цилиндра D_цил", steps.step4.D_cyl_mm, "мм"],
+                ["Макс. давление p_max", steps.step4.p_max_MPa, "МПа"],
+                ["Объем газовой камеры V_0", steps.step4.V_0_cm3, "см³"],
+                ["Посадочный удар P_y^расч", steps.step6.P_y_land_kN, "кН"],
+                ["Разбег при взлете P_y_взл^расч", steps.step6.P_y_takeoff_kN, "кН"],
+                ["Боковой удар P_z^расч", steps.step6.P_z_side_kN, "кН"]
+            ];
+
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Результаты расчёта");
+
+            // Sheet 2: Polytrope Points
+            const polytropeHeader = [["Ход амортизатора (мм)", "Давление (МПа)", "Усилие (кН)"]];
+            const polytropeRows = res.polytrope_points.map(p => [
+                parseFloat(p.delta_mm),
+                parseFloat(p.pressure_MPa),
+                parseFloat(p.force_kN)
+            ]);
+            const wsPolytrope = XLSX.utils.aoa_to_sheet(polytropeHeader.concat(polytropeRows));
+            XLSX.utils.book_append_sheet(wb, wsPolytrope, "Политропа сжатия");
+
+            XLSX.writeFile(wb, "Расчет_шасси_результаты.xlsx");
         }
     </script>
 </body>
