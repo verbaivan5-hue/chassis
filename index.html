@@ -48,12 +48,12 @@
                             <input type="number" id="P_st_vzl" class="form-control" value="50000">
                         </div>
                         <div class="col-6 mb-2">
-                            <label class="form-label small">Взлетная скорость V_взл (м/с):</label>
-                            <input type="number" id="V_vzl" class="form-control" value="70">
+                            <label class="form-label small">Взлетная скорость V_взл (км/ч):</label>
+                            <input type="number" id="V_vzl" class="form-control" value="250">
                         </div>
                         <div class="col-6 mb-2">
-                            <label class="form-label small">Посадочная скорость V_пос (м/с):</label>
-                            <input type="number" id="V_pos" class="form-control" value="60">
+                            <label class="form-label small">Посадочная скорость V_пос (км/ч):</label>
+                            <input type="number" id="V_pos" class="form-control" value="210">
                         </div>
                         <div class="col-6 mb-2">
                             <label class="form-label small">Давление зарядки p0 (МПа):</label>
@@ -157,8 +157,8 @@
                 strut_type: type,
                 P_st_pos: parseFloat(document.getElementById('P_st_pos').value),
                 P_st_vzl: parseFloat(document.getElementById('P_st_vzl').value),
-                V_vzl: parseFloat(document.getElementById('V_vzl').value || 70),
-                V_pos: parseFloat(document.getElementById('V_pos').value || 60),
+                V_vzl: parseFloat(document.getElementById('V_vzl').value || 250),
+                V_pos: parseFloat(document.getElementById('V_pos').value || 210),
                 p_0: parseFloat(document.getElementById('p_0').value || 6.0),
                 G0_Gpos: parseFloat(document.getElementById('G0_Gpos').value || 1.15),
                 n_wheels: parseFloat(document.getElementById('n_wheels').value),
@@ -396,8 +396,8 @@
                 ["--- ИСХОДНЫЕ ДАННЫЕ ---", "", ""],
                 ["P_ст.пос", params.P_st_pos, "Н"],
                 ["P_ст.взл", params.P_st_vzl, "Н"],
-                ["Взлетная скорость V_взл", params.V_vzl, "м/с"],
-                ["Посадочная скорость V_пос", params.V_pos, "м/с"],
+                ["Взлетная скорость V_взл", params.V_vzl, "км/ч"],
+                ["Посадочная скорость V_пос", params.V_pos, "км/ч"],
                 ["Давление зарядки p0", params.p_0, "МПа"],
                 ["Соотношение G0/Gпос", params.G0_Gpos, ""],
                 ["Число колес n_кол", params.n_wheels, ""],
