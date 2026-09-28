@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет амортизации шасси — Единое методическое руководство</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-box { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 2rem; border-radius: 0.5rem; margin-bottom: 2rem; }
+        .card { border: none; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
+        .btn-primary { background-color: #2563eb; border: none; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .step-badge { background-color: #e2e8f0; color: #1e293b; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+    </style>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="header-box text-center">
+            <h1 class="fw-bold">Единое методическое руководство</h1>
+            <p class="lead mb-0">Расчёт и проектирование основных типов стоек шасси летательных аппаратов (МАИ)</p>
+        </div>
+
+        <div class="row">
+            <!-- Left Column: Inputs -->
+            <div class="col-lg-5">
+                <div class="card p-4">
+                    <h4 class="fw-bold text-dark mb-3">1. Выбор типа стойки</h4>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Тип стойки шасси:</label>
+                        <select id="strut_type" class="form-select" onchange="toggleInputs()">
+                            <option value="1">Глава 1. Телескопическая стойка шасси</option>
+                            <option value="2">Глава 2. Рычажная / полурычажная стойка шасси</option>
+                            <option value="3">Глава 3. Стойка с выносным амортизатором</option>
+                        </select>
+                    </div>
+
+                    <h4 class="fw-bold text-dark mb-3 mt-2">2. Исходные данные (Предисловие)</h4>
+                    <div class="row g-2">
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">P_ст.пос (Н):</label>
+                            <input type="number" id="P_st_pos" class="form-control" value="45000">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">P_ст.взл (Н):</label>
+                            <input type="number" id="P_st_vzl" class="form-control" value="50000">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Число колес n_кол:</label>
+                            <input type="number" id="n_wheels" class="form-control" value="2">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Нормируемая работа A* (Дж):</label>
+                            <input type="number" id="A_star" class="form-control" value="65000">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Коэф. полноты η:</label>
+                            <input type="number" step="0.01" id="eta" class="form-control" value="0.8">
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label class="form-label small">Коэф. нелинейности K:</label>
+                            <input type="number" step="0.01" id="K" class="form-control" value="0.8">
+                        </div>
+                    </div>
+
+                    <h4 class="fw-bold text-dark mb-3 mt-3">3. Параметры выбранной стойки</h4>
+                    <div id="type1_inputs">
+                        <div class="mb-2">
+                            <label class="form-label small">Угол наклона стойки θ (град):</label>
+                            <input type="number" id="theta_deg" class="form-control" value="0">
+                        </div>
+                    </div>
+                    <div id="type2_inputs" style="display:none;">
+                        <div class="mb-2">
+                            <label class="form-label small">Отношение плеч рычага b/a:</label>
+                            <input type="number" step="0.1" id="b_a" class="form-control" value="1.2">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Давление газа p0 (МПа):</label>
+                            <input type="number" step="0.5" id="p_0_lever" class="form-control" value="6.0">
+                        </div>
+                    </div>
+                    <div id="type3_inputs" style="display:none;">
+                        <div class="mb-2">
+                            <label class="form-label small">Отношение плеч рычага b/a:</label>
+                            <input type="number" step="0.1" id="b_a_ext" class="form-control" value="1.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Давление газа p0 (МПа):</label>
+                            <input type="number" step="0.5" id="p_0_ext" class="form-control" value="8.0">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-4 fw-bold py-2" onclick="runCalculation()">Рассчитать шасси</button>
+                </div>
+            </div>
+
+            <!-- Right Column: Results & Graphs -->
+            <div class="col-lg-7">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold text-dark m-0">Результаты расчета</h4>
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Печать / Сохранить в PDF</button>
+                        </div>
+                    </div>
+
+                    <div id="results_container">
+                        <p class="text-muted text-center py-4">Нажмите «Рассчитать шасси» для получения результатов.</p>
+                    </div>
+
+                    <div id="chart_container" class="mt-4" style="display:none;">
+                        <h5 class="fw-bold text-dark">Политропа сжатия газа (Шаг 5)</h5>
+                        <canvas id="polytropeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let myChart = null;
+
+        function toggleInputs() {
+            const type = document.getElementById('strut_type').value;
+            document.getElementById('type1_inputs').style.display = type == '1' ? 'block' : 'none';
+            document.getElementById('type2_inputs').style.display = type == '2' ? 'block' : 'none';
+            document.getElementById('type3_inputs').style.display = type == '3' ? 'block' : 'none';
+        }
+
+        function getFormData() {
+            const type = parseInt(document.getElementById('strut_type').value);
+            let p_0_gas = 0.6e6;
+            if (type == 2) p_0_gas = parseFloat(document.getElementById('p_0_lever').value) * 1e6;
+            if (type == 3) p_0_gas = parseFloat(document.getElementById('p_0_ext').value) * 1e6;
+
+            return {
+                strut_type: type,
+                P_st_pos: parseFloat(document.getElementById('P_st_pos').value),
+                P_st_vzl: parseFloat(document.getElementById('P_st_vzl').value),
+                n_wheels: parseFloat(document.getElementById('n_wheels').value),
+                A_star: parseFloat(document.getElementById('A_star').value),
+                eta: parseFloat(document.getElementById('eta').value),
+                K: parseFloat(document.getElementById('K').value),
+                theta_deg: parseFloat(document.getElementById('theta_deg').value || 0),
+                b_a: parseFloat(document.getElementById('b_a').value || 1.2),
+                b_a_ext: parseFloat(document.getElementById('b_a_ext').value || 1.1),
+                p_0_gas: p_0_gas
+            };
+        }
+
+        function calculateLandingGearLocal(params) {
+            const strut_type = params.strut_type;
+            const P_st_pos = params.P_st_pos;
+            const P_st_vzl = params.P_st_vzl;
+            const A_star = params.A_star;
+            const G_vzl_G_pos = 1.15;
+            const eta = params.eta;
+            const K = params.K;
+            const k_gas = 1.2;
+            const f_safety = 1.5;
+            const d_p_k = 20.0;
+
+            const A_max = A_star * G_vzl_G_pos;
+
+            let stroke_ratio = 2.5;
+            let P_pm_max, delta_pm, delta_am;
+
+            if (strut_type === 1) {
+                stroke_ratio = 2.5;
+                const theta_rad = (params.theta_deg * Math.PI) / 180.0;
+                const cos_t = Math.cos(theta_rad);
+                const coeff_work = (0.5 * K) / d_p_k + (stroke_ratio * cos_t) / (eta * d_p_k);
+                P_pm_max = Math.sqrt((A_max / coeff_work) * 1000);
+                delta_pm = P_pm_max / d_p_k;
+                delta_am = delta_pm * stroke_ratio;
+            } else if (strut_type === 2) {
+                stroke_ratio = 2.0;
+                const b_a = params.b_a;
+                const coeff_work = (0.5 * K) / d_p_k + (stroke_ratio / b_a) / (eta * d_p_k);
+                P_pm_max = Math.sqrt((A_max / coeff_work) * 1000);
+                delta_pm = P_pm_max / d_p_k;
+                delta_am = delta_pm * stroke_ratio;
+            } else {
+                stroke_ratio = 1.8;
+                const b_a_ext = params.b_a_ext;
+                const coeff_work = (0.5 * K) / d_p_k + (stroke_ratio / b_a_ext) / (eta * d_p_k);
+                P_pm_max = Math.sqrt((A_max / coeff_work) * 1000);
+                delta_pm = P_pm_max / d_p_k;
+                delta_am = delta_pm * stroke_ratio;
+            }
+
+            const n_y_calc = P_pm_max / P_st_pos;
+            const ap25_passed = n_y_calc <= 3.5;
+
+            const P_nom = (0.4 + 0.1 * eta) * P_pm_max;
+            const p_0_gas = params.p_0_gas;
+            const d_rod = Math.sqrt((4 * P_nom) / (Math.PI * p_0_gas)) * 1000;
+            const D_cyl = d_rod + (strut_type === 1 ? 30 : strut_type === 2 ? 36 : 40);
+            const p_max = P_pm_max / (Math.PI * Math.pow(d_rod / 2000, 2));
+            const V_0 = (P_pm_max * delta_am) / 1000;
+
+            const polytrope_points = [];
+            const num_steps = 10;
+            const A_rod = (Math.PI * Math.pow(d_rod, 2)) / 4.0;
+            for (let i = 0; i <= num_steps; i++) {
+                const delta_i = (delta_am / num_steps) * i;
+                const vol_i = Math.max(V_0 - A_rod * delta_i, V_0 * 0.15);
+                const p_i = p_0_gas * Math.pow(V_0 / vol_i, k_gas);
+                const force_i = p_i * (A_rod / 1e6);
+                polytrope_points.push({
+                    delta_mm: delta_i.toFixed(2),
+                    pressure_MPa: (p_i / 1e6).toFixed(2),
+                    force_kN: (force_i / 1000).toFixed(2)
+                });
+            }
+
+            const P_y_land = P_pm_max * f_safety;
+            const P_y_takeoff = P_st_vzl * n_y_calc * f_safety;
+            const P_z_side = 0.25 * P_y_land;
+
+            const strut_names = [
+                'Телескопическая стойка (Глава 1)',
+                'Рычажная / Полурычажная стойка (Глава 2)',
+                'Стойка с выносным амортизатором (Глава 3)'
+            ];
+
+            return {
+                strut_type: strut_type,
+                strut_name: strut_names[strut_type - 1],
+                steps: {
+                    step1: {
+                        title: 'Шаг 1. Максимальная работа и распределение энергии',
+                        A_max_J: A_max.toFixed(2),
+                        G_vzl_G_pos: G_vzl_G_pos
+                    },
+                    step2_3: {
+                        title: 'Шаг 2-3. Уравнение совместности и эксплуатационная перегрузка',
+                        delta_pm_mm: delta_pm.toFixed(2),
+                        delta_am_mm: delta_am.toFixed(2),
+                        P_pm_max_kN: (P_pm_max / 1000).toFixed(2),
+                        n_y_calc: n_y_calc.toFixed(3),
+                        ap25_passed: ap25_passed,
+                        ap25_limit: 3.5
+                    },
+                    step4: {
+                        title: 'Шаг 4. Геометрические параметры амортизатора',
+                        d_rod_mm: d_rod.toFixed(1),
+                        D_cyl_mm: D_cyl.toFixed(1),
+                        p_max_MPa: (p_max / 1e6).toFixed(2),
+                        V_0_cm3: (V_0 / 1000).toFixed(1)
+                    },
+                    step6: {
+                        title: 'Шаг 6. Расчётные случаи нагружения (с учётом f_безопасности = 1.5 по АП-25)',
+                        P_y_land_kN: (P_y_land / 1000).toFixed(2),
+                        P_y_takeoff_kN: (P_y_takeoff / 1000).toFixed(2),
+                        P_z_side_kN: (P_z_side / 1000).toFixed(2)
+                    }
+                },
+                polytrope_points: polytrope_points
+            };
+        }
+
+        async function runCalculation() {
+            const payload = getFormData();
+            let resData;
+            try {
+                const res = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    resData = data.data;
+                } else {
+                    resData = calculateLandingGearLocal(payload);
+                }
+            } catch (e) {
+                resData = calculateLandingGearLocal(payload);
+            }
+            renderResults(resData);
+        }
+
+        function renderResults(res) {
+            const steps = res.steps;
+            let html = `<h5 class="text-primary fw-bold mb-3">${res.strut_name}</h5>`;
+
+            // Step 1
+            html += `<div class="mb-3 p-3 bg-light rounded">
+                <span class="step-badge">${steps.step1.title}</span>
+                <div class="mt-2">Макс. работа A_max: <b>${steps.step1.A_max_J} Дж</b></div>
+            </div>`;
+
+            // Step 2-3
+            const apBadge = steps.step2_3.ap25_passed ?
+                '<span class="badge bg-success">Соответствует АП-25 (ny ≤ 3.5)</span>' :
+                '<span class="badge bg-danger">Превышение АП-25!</span>';
+            html += `<div class="mb-3 p-3 bg-light rounded">
+                <span class="step-badge">${steps.step2_3.title}</span>
+                <div class="mt-2">Ход пневматика: <b>${steps.step2_3.delta_pm_mm} мм</b></div>
+                <div>Ход амортизатора: <b>${steps.step2_3.delta_am_mm} мм</b></div>
+                <div>Макс. усилие P_пм^max: <b>${steps.step2_3.P_pm_max_kN} кН</b></div>
+                <div>Эксплуатационная перегрузка n_y^расч: <b>${steps.step2_3.n_y_calc}</b> ${apBadge}</div>
+            </div>`;
+
+            // Step 4
+            html += `<div class="mb-3 p-3 bg-light rounded">
+                <span class="step-badge">${steps.step4.title}</span>
+                <div class="mt-2">Диаметр штока d_шток: <b>${steps.step4.d_rod_mm} мм</b></div>
+                <div>Диаметр цилиндра D_цил: <b>${steps.step4.D_cyl_mm} мм</b></div>
+                <div>Макс. давление p_max: <b>${steps.step4.p_max_MPa} МПа</b></div>
+                <div>Объем газовой камеры V_0: <b>${steps.step4.V_0_cm3} см³</b></div>
+            </div>`;
+
+            // Step 6
+            html += `<div class="mb-3 p-3 bg-light rounded">
+                <span class="step-badge">${steps.step6.title}</span>
+                <div class="mt-2">Посадочный удар P_y^расч: <b>${steps.step6.P_y_land_kN} кН</b></div>
+                <div>Разбег при взлете P_y_взл^расч: <b>${steps.step6.P_y_takeoff_kN} кН</b></div>
+                <div>Боковой удар P_z^расч: <b>${steps.step6.P_z_side_kN} кН</b></div>
+            </div>`;
+
+            document.getElementById('results_container').innerHTML = html;
+            document.getElementById('chart_container').style.display = 'block';
+
+            renderChart(res.polytrope_points);
+        }
+
+        function renderChart(points) {
+            const ctx = document.getElementById('polytropeChart').getContext('2d');
+            const labels = points.map(p => p.delta_mm + ' мм');
+            const pressures = points.map(p => p.pressure_MPa);
+            const forces = points.map(p => p.force_kN);
+
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Давление (МПа)', data: pressures, borderColor: '#2563eb', fill: false },
+                        { label: 'Усилие (кН)', data: forces, borderColor: '#16a34a', fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Ход амортизатора (мм)' } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
