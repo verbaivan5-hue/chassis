@@ -138,29 +138,29 @@ footer{text-align:center;padding:1.2rem;color:var(--muted);font-size:.85rem;bord
 
 <script>
 const CATALOG = [
-  {id:1, size:"500×150", D:500, B:150, Pland:480, Pto:480, Vto:120, Vland:105, p0:5, Pmax:[3600,2150], dmax:[88,85], Amax:[136,75.1]},
-  {id:2, size:"520×125", D:520, B:125, Pland:1400, Pto:1400, Vto:280, Vland:270, p0:10, Pmax:[5200,2800], dmax:[66,62], Amax:[135,67]},
-  {id:3, size:"570×140", D:570, B:140, Pland:2000, Pto:2600, Vto:290, Vland:300, p0:10, Pmax:[7650,4000], dmax:[86.5,80], Amax:[290,140]},
-  {id:4, size:"600×155", D:600, B:155, Pland:2100, Pto:2600, Vto:280, Vland:300, p0:12.5, Pmax:[11300,4800], dmax:[100,91], Amax:[507,185]},
-  {id:5, size:"600×180", D:600, B:180, Pland:2560, Pto:2560, Vto:0, Vland:85, p0:10, Pmax:[9800,5200], dmax:[113,109], Amax:[480,245]},
-  {id:6, size:"660×160", D:660, B:160, Pland:2175, Pto:2900, Vto:275, Vland:205, p0:15, Pmax:[14000,5500], dmax:[100,91], Amax:[588,212]},
-  {id:7, size:"660×200", D:660, B:200, Pland:2850, Pto:4500, Vto:340, Vland:270, p0:14, Pmax:[15200,7300], dmax:[110,101], Amax:[731,313.4]},
-  {id:8, size:"700×200", D:700, B:200, Pland:1760, Pto:3500, Vto:370, Vland:280, p0:12.5, Pmax:[14000,6600], dmax:[106,101.5], Amax:[663,291]},
-  {id:9, size:"800×200", D:800, B:200, Pland:4300, Pto:5500, Vto:390, Vland:320, p0:14, Pmax:[21800,8500], dmax:[123.5,119], Amax:[1140,425]},
-  {id:10, size:"800×225", D:800, B:225, Pland:2980, Pto:4200, Vto:300, Vland:220, p0:13, Pmax:[20900,12950], dmax:[126,119], Amax:[1120,640]},
-  {id:11, size:"800×260", D:800, B:260, Pland:2400, Pto:2400, Vto:150, Vland:90, p0:7.5, Pmax:[17000,11450], dmax:[180.5,175], Amax:[1340,870]},
-  {id:12, size:"880×230", D:880, B:230, Pland:5200, Pto:7400, Vto:410, Vland:340, p0:16, Pmax:[24100,13500], dmax:[121.5,114], Amax:[1274,669]},
-  {id:13, size:"900×300", D:900, B:300, Pland:5000, Pto:5000, Vto:190, Vland:175, p0:10, Pmax:[27800,15200], dmax:[207,199], Amax:[2474,1300]},
-  {id:14, size:"930×305", D:930, B:305, Pland:6200, Pto:7850, Vto:300, Vland:260, p0:10, Pmax:[25100,13800], dmax:[177,171], Amax:[1935,1026]},
-  {id:15, size:"950×350", D:950, B:350, Pland:4700, Pto:4800, Vto:200, Vland:200, p0:10, Pmax:[30000,16400], dmax:[197,193], Amax:[2482,1331]},
-  {id:16, size:"1050×300", D:1050, B:300, Pland:6900, Pto:7250, Vto:240, Vland:240, p0:10, Pmax:[29400,13750], dmax:[188,176.5], Amax:[2349,1175]},
-  {id:17, size:"1100×330", D:1100, B:330, Pland:7700, Pto:9500, Vto:330, Vland:260, p0:11, Pmax:[39000,27000], dmax:[197,191], Amax:[3300,2200]},
-  {id:18, size:"1230×260", D:1230, B:260, Pland:5810, Pto:5810, Vto:60, Vland:80, p0:17, Pmax:[42400,25000], dmax:[150.5,145], Amax:[2730,1559]},
-  {id:19, size:"1300×360", D:1300, B:360, Pland:11000, Pto:15200, Vto:400, Vland:320, p0:16, Pmax:[59750,32000], dmax:[201.5,193], Amax:[5312,2717]},
-  {id:20, size:"1450×450", D:1450, B:450, Pland:13000, Pto:19470, Vto:330, Vland:270, p0:13, Pmax:[77400,49100], dmax:[276,269], Amax:[9280,5679]},
-  {id:21, size:"1450×580", D:1450, B:580, Pland:10000, Pto:10000, Vto:250, Vland:240, p0:6.5, Pmax:[53500,32000], dmax:[365,356], Amax:[8750,5000]},
-  {id:22, size:"1500×500", D:1500, B:500, Pland:16000, Pto:22000, Vto:300, Vland:280, p0:12.5, Pmax:[96500,40000], dmax:[320,308], Amax:[12969,5174]},
-  {id:23, size:"1750×730", D:1750, B:730, Pland:17000, Pto:18000, Vto:60, Vland:80, p0:5, Pmax:[52000,45750], dmax:[396,386], Amax:[10500,7312]}
+  {id:1, mass:13.0, size:"500×150", D:500, B:150, Pland:480, Pto:480, Vto:120, Vland:105, p0:5, Pmax:[3600,2150], dmax:[88,85], Amax:[136,75.1]},
+  {id:2, mass:29.0, size:"520×125", D:520, B:125, Pland:1400, Pto:1400, Vto:280, Vland:270, p0:10, Pmax:[5200,2800], dmax:[66,62], Amax:[135,67]},
+  {id:3, mass:46.5, size:"570×140", D:570, B:140, Pland:2000, Pto:2600, Vto:290, Vland:300, p0:10, Pmax:[7650,4000], dmax:[86.5,80], Amax:[290,140]},
+  {id:4, mass:58.9, size:"600×155", D:600, B:155, Pland:2100, Pto:2600, Vto:280, Vland:300, p0:12.5, Pmax:[11300,4800], dmax:[100,91], Amax:[507,185]},
+  {id:5, mass:27.9, size:"600×180", D:600, B:180, Pland:2560, Pto:2560, Vto:0, Vland:85, p0:10, Pmax:[9800,5200], dmax:[113,109], Amax:[480,245]},
+  {id:6, mass:51.8, size:"660×160", D:660, B:160, Pland:2175, Pto:2900, Vto:275, Vland:205, p0:15, Pmax:[14000,5500], dmax:[100,91], Amax:[588,212]},
+  {id:7, mass:75.1, size:"660×200", D:660, B:200, Pland:2850, Pto:4500, Vto:340, Vland:270, p0:14, Pmax:[15200,7300], dmax:[110,101], Amax:[731,313.4]},
+  {id:8, mass:65.5, size:"700×200", D:700, B:200, Pland:1760, Pto:3500, Vto:370, Vland:280, p0:12.5, Pmax:[14000,6600], dmax:[106,101.5], Amax:[663,291]},
+  {id:9, mass:114.5, size:"800×200", D:800, B:200, Pland:4300, Pto:5500, Vto:390, Vland:320, p0:14, Pmax:[21800,8500], dmax:[123.5,119], Amax:[1140,425]},
+  {id:10, mass:78.2, size:"800×225", D:800, B:225, Pland:2980, Pto:4200, Vto:300, Vland:220, p0:13, Pmax:[20900,12950], dmax:[126,119], Amax:[1120,640]},
+  {id:11, mass:55.0, size:"800×260", D:800, B:260, Pland:2400, Pto:2400, Vto:150, Vland:90, p0:7.5, Pmax:[17000,11450], dmax:[180.5,175], Amax:[1340,870]},
+  {id:12, mass:152.5, size:"880×230", D:880, B:230, Pland:5200, Pto:7400, Vto:410, Vland:340, p0:16, Pmax:[24100,13500], dmax:[121.5,114], Amax:[1274,669]},
+  {id:13, mass:110.5, size:"900×300", D:900, B:300, Pland:5000, Pto:5000, Vto:190, Vland:175, p0:10, Pmax:[27800,15200], dmax:[207,199], Amax:[2474,1300]},
+  {id:14, mass:127.5, size:"930×305", D:930, B:305, Pland:6200, Pto:7850, Vto:300, Vland:260, p0:10, Pmax:[25100,13800], dmax:[177,171], Amax:[1935,1026]},
+  {id:15, mass:113.5, size:"950×350", D:950, B:350, Pland:4700, Pto:4800, Vto:200, Vland:200, p0:10, Pmax:[30000,16400], dmax:[197,193], Amax:[2482,1331]},
+  {id:16, mass:146.8, size:"1050×300", D:1050, B:300, Pland:6900, Pto:7250, Vto:240, Vland:240, p0:10, Pmax:[29400,13750], dmax:[188,176.5], Amax:[2349,1175]},
+  {id:17, mass:215.0, size:"1100×330", D:1100, B:330, Pland:7700, Pto:9500, Vto:330, Vland:260, p0:11, Pmax:[39000,27000], dmax:[197,191], Amax:[3300,2200]},
+  {id:18, mass:158.0, size:"1230×260", D:1230, B:260, Pland:5810, Pto:5810, Vto:60, Vland:80, p0:17, Pmax:[42400,25000], dmax:[150.5,145], Amax:[2730,1559]},
+  {id:19, mass:263.0, size:"1300×360", D:1300, B:360, Pland:11000, Pto:15200, Vto:400, Vland:320, p0:16, Pmax:[59750,32000], dmax:[201.5,193], Amax:[5312,2717]},
+  {id:20, mass:371.8, size:"1450×450", D:1450, B:450, Pland:13000, Pto:19470, Vto:330, Vland:270, p0:13, Pmax:[77400,49100], dmax:[276,269], Amax:[9280,5679]},
+  {id:21, mass:171.5, size:"1450×580", D:1450, B:580, Pland:10000, Pto:10000, Vto:250, Vland:240, p0:6.5, Pmax:[53500,32000], dmax:[365,356], Amax:[8750,5000]},
+  {id:22, mass:434.0, size:"1500×500", D:1500, B:500, Pland:16000, Pto:22000, Vto:300, Vland:280, p0:12.5, Pmax:[96500,40000], dmax:[320,308], Amax:[12969,5174]},
+  {id:23, mass:320.0, size:"1750×730", D:1750, B:730, Pland:17000, Pto:18000, Vto:60, Vland:80, p0:5, Pmax:[52000,45750], dmax:[396,386], Amax:[10500,7312]}
 ];
 
 let lastResult = null;
@@ -258,14 +258,19 @@ function solve(){
       const Vpos = num('Vpos');
       const Vvzl = num('Vvzl');
 
+      // Отфильтруем по скоростям изначально
+      const speedFilteredCatalog = CATALOG.filter(w => w.Vland >= Vpos && w.Vto >= Vvzl);
+
+      let bestMass = Infinity;
+
       for(const Nkol of Nopts){
         const Ppos_daN = Ppos / 10 / Nkol;
         const Pvzl_daN = Pvzl / 10 / Nkol;
 
-        for(let i=0; i<CATALOG.length; i++){
-          const w = CATALOG[i];
-          // Колесо должно быть не слабее по всем 4 параметрам
-          if(w.Pland < Ppos_daN || w.Pto < Pvzl_daN || w.Vland < Vpos || w.Vto < Vvzl) continue;
+        for(let i=0; i<speedFilteredCatalog.length; i++){
+          const w = speedFilteredCatalog[i];
+          // Колесо должно выдерживать нагрузку, поделенную на количество колес
+          if(w.Pland < Ppos_daN || w.Pto < Pvzl_daN) continue;
 
           // Берём характеристики колеса (точка 0; при необходимости можно усреднить)
           const wData = wheelSI(w, 0);
@@ -282,12 +287,16 @@ function solve(){
                       for(let deltab=deltabMin; deltab<=deltabMax; deltab+=5){
                         const r = calcVariant({Ppos,Ae,G0G,Nkol,eta,p0tire,Lk,Lam,K,Sam,coef,p0am,pmax,k,deltab,hzhmax,wA,wB});
                         if(!r) continue;
-                        // Оценка: доля газа + близость ny к 2.5 − штраф за лишние колёса
-                        // Небольшой бонус более «лёгкому» колесу (меньший размер)
-                        const score = r.share*10 + (3.5-Math.abs(r.ny-2.5))*40 - Nkol*8 - w.D*0.01;
-                        if(score > bestScore){
+
+                        // Считаем общую массу для данного варианта: масса одного колеса * количество колёс
+                        const totalMass = w.mass * Nkol;
+                        const score = r.share*10 + (3.5-Math.abs(r.ny-2.5))*40; // Вторичный критерий
+
+                        // Оптимизация по массе
+                        if(totalMass < bestMass || (totalMass === bestMass && score > bestScore)){
+                          bestMass = totalMass;
                           bestScore = score;
-                          best = {...r, wheelId: w.id, size: w.size, D: w.D, B: w.B, strutType};
+                          best = {...r, wheelId: w.id, size: w.size, D: w.D, B: w.B, mass: w.mass, totalMass: totalMass, strutType};
                         }
                       }
                     }
@@ -329,6 +338,10 @@ function solve(){
           <tr><th>Параметр</th><th>Значение</th></tr>
           <tr><td>Nкол</td><td><b>${best.Nkol}</b></td></tr>
           <tr><td>Колесо</td><td>№${best.wheelId} (${best.size}, D=${best.D} мм, B=${best.B} мм)</td></tr>
+
+          <tr><td>Масса 1 колеса</td><td><b>${best.mass.toFixed(1)} кг</b></td></tr>
+
+          <tr><td>Общая масса колёс</td><td><b>${best.totalMass.toFixed(1)} кг</b></td></tr>
           <tr><td>Sам</td><td><b>${best.Sam} мм</b></td></tr>
           <tr><td>Коэфф. Pнач</td><td><b>${best.coef.toFixed(2)}</b></td></tr>
           <tr><td>K</td><td><b>${best.K.toFixed(2)}</b></td></tr>
@@ -359,6 +372,8 @@ function solve(){
           <tr><th>Параметр</th><th>Значение</th><th>Ед.</th></tr>
           <tr><td>Nкол</td><td>${best.Nkol}</td><td>шт</td></tr>
           <tr><td>Колесо</td><td>№${best.wheelId} (${best.size}, D=${best.D} мм, B=${best.B} мм)</td><td>—</td></tr>
+
+          <tr><td>Общая масса колёс</td><td><b>${best.totalMass.toFixed(1)}</b></td><td>кг</td></tr>
           <tr><td>Тип стойки</td><td>${strutName}</td><td>—</td></tr>
           <tr><td>Pмд</td><td>${best.Pmd.toFixed(0)}</td><td>Н</td></tr>
           <tr><td>δмд</td><td>${best.dmd.toFixed(2)}</td><td>мм</td></tr>
@@ -402,6 +417,8 @@ function exportExcel(){
     ['Тип_стойки', strutName, '—'],
     ['Nкол', r.Nkol, 'шт'],
     ['Колесо', '№'+r.wheelId+' ('+r.size+', D='+r.D+' мм, B='+r.B+' мм)', '—'],
+    ['Масса_1_колеса', r.mass, 'кг'],
+    ['Общая_масса_колес', r.totalMass, 'кг'],
     ['Sам', r.Sam, 'мм'],
     ['Коэфф_Pнач', r.coef, '—'],
     ['K', r.K, '—'],
