@@ -129,7 +129,6 @@ footer{text-align:center;padding:1.2rem;color:var(--muted);font-size:.85rem;bord
     <div class="solution" id="sol"></div>
     <div class="actions">
       <button class="btn" id="exportBtn">Выгрузить в Excel</button>
-      <button class="btn" onclick="window.print()">Печать / PDF</button>
       <button class="btn btn-sec" onclick="document.getElementById('result').style.display='none';document.getElementById('inputs').style.display='block'">Изменить данные</button>
     </div>
   </div>
@@ -251,8 +250,8 @@ function solve(){
       let best=null, bestScore=-Infinity;
       const Nopts=[1,2,4,6];
 
-      const LkList = strutType==='telescopic' ? [400] : [800,900,1000,1100,1200];
-      const LamList = strutType==='telescopic' ? [400] : [300,350,400,450,500];
+      const LkList = strutType==='telescopic' ? [0] : [800,900,1000,1100,1200];
+      const LamList = strutType==='telescopic' ? [0] : [300,350,400,450,500];
 
       const Pvzl = num('Pvzl');
       const Vpos = num('Vpos');
@@ -345,8 +344,8 @@ function solve(){
           <tr><td>Sам</td><td><b>${best.Sam} мм</b></td></tr>
           <tr><td>Коэфф. Pнач</td><td><b>${best.coef.toFixed(2)}</b></td></tr>
           <tr><td>K</td><td><b>${best.K.toFixed(2)}</b></td></tr>
-          <tr><td>Lk</td><td><b>${best.Lk} мм</b></td></tr>
-          <tr><td>Lам</td><td><b>${best.Lam} мм</b></td></tr>
+          ${best.strutType === 'semi' ? `<tr><td>Lk</td><td><b>${best.Lk} мм</b></td></tr>` : ''}
+          ${best.strutType === 'semi' ? `<tr><td>Lам</td><td><b>${best.Lam} мм</b></td></tr>` : ''}
           <tr><td>p₀ аморт.</td><td>${best.p0am} МПа</td></tr>
           <tr><td>δб</td><td>${best.deltab} мм</td></tr>
         </table>
@@ -380,7 +379,7 @@ function solve(){
           <tr><td>Pпн max</td><td>${best.Ppn.toFixed(0)}</td><td>Н</td></tr>
           <tr><td><b>ny max</b></td><td><b>${best.ny.toFixed(3)}</b></td><td>—</td></tr>
           <tr><td>Sам</td><td>${best.Sam}</td><td>мм</td></tr>
-          <tr><td>Lk / Lам</td><td>${best.Lk} / ${best.Lam}</td><td>мм</td></tr>
+          ${best.strutType === 'semi' ? `<tr><td>Lk / Lам</td><td>${best.Lk} / ${best.Lam}</td><td>мм</td></tr>` : ''}
           <tr><td>dшт</td><td>${best.dst}</td><td>мм</td></tr>
           <tr><td>Dцил</td><td>${best.Dcil}</td><td>мм</td></tr>
           <tr><td>h₀</td><td>${best.h0}</td><td>мм</td></tr>
@@ -421,9 +420,15 @@ function exportExcel(){
     ['Общая_масса_колес', r.totalMass, 'кг'],
     ['Sам', r.Sam, 'мм'],
     ['Коэфф_Pнач', r.coef, '—'],
-    ['K', r.K, '—'],
-    ['Lk', r.Lk, 'мм'],
-    ['Lам', r.Lam, 'мм'],
+    ['K', r.K, '—']
+  ];
+
+  if(r.strutType === 'semi'){
+    rows.push(['Lk', r.Lk, 'мм']);
+    rows.push(['Lам', r.Lam, 'мм']);
+  }
+
+  rows.push(
     ['p0_амортизатора', r.p0am, 'МПа'],
     ['δб', r.deltab, 'мм'],
     ['Pмд', Math.round(r.Pmd), 'Н'],
@@ -445,7 +450,8 @@ function exportExcel(){
     ['hmax', r.hmax.toFixed(1), 'мм'],
     ['Aгаза', Math.round(r.Agas), 'Дж'],
     ['Доля_газа', r.share.toFixed(1), '%']
-  ];
+  );
+
   const bom = '\uFEFF';
   const csv = bom + rows.map(row => row.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
