@@ -69,7 +69,7 @@ footer{text-align:center;padding:1.2rem;color:var(--muted);font-size:.85rem;bord
         <div>
           <label>Тип стойки</label>
           <select id="strutType">
-            <option value="telescopic">Телескопическая (Lk = Lам)</option>
+            <option value="telescopic">Телескопическая</option>
             <option value="semi" selected>Полурычажная</option>
           </select>
         </div>
@@ -170,7 +170,7 @@ function num(id){ return parseFloat($(id).value); }
 document.getElementById('strutType').addEventListener('change', function(){
   const t = this.value;
   $('strutHint').textContent = t === 'telescopic'
-    ? 'Телескопическая стойка: принимается Lk = Lам (передаточное отношение = 1).'
+    ? 'Телескопическая стойка: передаточное отношение = 1.'
     : 'Полурычажная стойка: программа сама подберёт оптимальные Lk и Lам.';
 });
 
@@ -250,8 +250,8 @@ function solve(){
       let best=null, bestScore=-Infinity;
       const Nopts=[1,2,4,6];
 
-      const LkList = strutType==='telescopic' ? [0] : [800,900,1000,1100,1200];
-      const LamList = strutType==='telescopic' ? [0] : [300,350,400,450,500];
+      const LkList = strutType==='telescopic' ? [1] : [800,900,1000,1100,1200];
+      const LamList = strutType==='telescopic' ? [1] : [300,350,400,450,500];
 
       const Pvzl = num('Pvzl');
       const Vpos = num('Vpos');
