@@ -1,441 +1,447 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расчет амортизации шасси — Единое методическое руководство</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
-        body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .header-box { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 2rem; border-radius: 0.5rem; margin-bottom: 2rem; }
-        .card { border: none; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 1.5rem; }
-        .btn-primary { background-color: #2563eb; border: none; }
-        .btn-primary:hover { background-color: #1d4ed8; }
-        .step-badge { background-color: #e2e8f0; color: #1e293b; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>aerotechlab — Расчёт шасси | aerotechlab.ton</title>
+<style>
+:root{--bg:#0b0e14;--card:#141824;--border:#2a3142;--primary:#3b82f6;--ok:#10b981;--text:#e5e7eb;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+header{background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:1.25rem} header span{color:var(--primary)}
+main{max-width:1100px;margin:0 auto;padding:1.5rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem}
+.card h2{font-size:1.1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.badge{font-size:.7rem;padding:.15rem .45rem;border-radius:6px;color:#fff}
+.badge-red{background:#ef4444}.badge-blue{background:#3b82f6}.badge-yellow{background:#eab308;color:#000}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
+@media(max-width:700px){.grid3{grid-template-columns:1fr}}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:.25rem}
+input,select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem .7rem;border-radius:8px;font-size:.95rem}
+input:focus,select:focus{outline:none;border-color:var(--primary)}
+.range-row{display:flex;align-items:center;gap:.4rem}
+.range-row input{width:45%}
+.range-row span{color:var(--muted)}
+.btn{background:var(--primary);color:#fff;border:none;padding:.7rem 1.4rem;border-radius:8px;font-weight:600;cursor:pointer;font-size:1rem}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-sec{background:transparent;border:1px solid var(--border);color:var(--text)}
+.actions{display:flex;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap}
+#result{display:none}
+.solution{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+.solution h2{color:var(--ok);margin-bottom:1rem}
+.solution h3{font-size:1.05rem;margin:1.2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+.solution table{width:100%;border-collapse:collapse;margin:.6rem 0 1rem;font-size:.9rem}
+.solution th,.solution td{border:1px solid var(--border);padding:.4rem .6rem;text-align:left}
+.solution th{background:#1e2433}
+.formula{background:#1a2030;padding:.55rem .9rem;border-radius:8px;margin:.4rem 0;font-family:Cambria,serif}
+.answer{background:#064e3b;border:1px solid #059669;padding:.55rem .9rem;border-radius:8px;margin:.4rem 0;font-weight:600}
+footer{text-align:center;padding:1.2rem;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:2rem}
+.status{color:var(--muted);font-size:.9rem;margin-top:.8rem}
+</style>
 </head>
 <body>
-    <div class="container my-4">
-        <div class="header-box text-center">
-            <h1 class="fw-bold">Единое методическое руководство</h1>
-            <p class="lead mb-0">Расчёт и проектирование основных типов стоек шасси летательных аппаратов (МАИ)</p>
+<header>
+  <h1>aerotechlab<span>.ton</span></h1>
+  <nav style="color:var(--muted);font-size:.9rem">Раздел: Шасси</nav>
+</header>
+<main>
+  <h1 style="font-size:1.5rem;margin-bottom:.3rem">Проектирование шасси</h1>
+  <p style="color:var(--muted);margin-bottom:1.5rem;font-size:.95rem">
+    Введите константы из задания и диапазоны выбираемых параметров. Программа подберёт оптимальное колесо, число колёс, размеры амортизатора. ny ∈ [2; 3.5].
+  </p>
+
+  <div id="inputs">
+    <div class="card">
+      <h2>Данные из задания <span class="badge badge-red">константы</span></h2>
+      <div class="grid3">
+        <div><label>Pпос (Н)</label><input type="number" id="Ppos" value="50000"></div>
+        <div><label>Pвзл (Н)</label><input type="number" id="Pvzl" value="70000"></div>
+        <div><label>Aэ (Дж)</label><input type="number" id="Ae" value="69000"></div>
+        <div><label>G₀/Gпос</label><input type="number" id="G0G" value="1.4" step="0.01"></div>
+        <div><label>Vпос (км/ч)</label><input type="number" id="Vpos" value="200"></div>
+        <div><label>Vвзл (км/ч)</label><input type="number" id="Vvzl" value="300"></div>
+        <div><label>p₀ колеса (×10⁶ Па)</label><input type="number" id="p0tire" value="12" step="0.1"></div>
+        <div><label>η</label><input type="number" id="eta" value="0.8" step="0.01"></div>
+        <div><label>pmax (МПа)</label><input type="number" id="pmax" value="50"></div>
+        <div><label>k политропы</label><input type="number" id="k" value="1.2" step="0.05"></div>
+        <div>
+          <label>Тип стойки</label>
+          <select id="strutType">
+            <option value="telescopic">Телескопическая (Lk = Lам)</option>
+            <option value="semi" selected>Полурычажная</option>
+          </select>
         </div>
-
-        <div class="row">
-            <!-- Left Column: Inputs -->
-            <div class="col-lg-5">
-                <div class="card p-4">
-                    <h4 class="fw-bold text-dark mb-3">1. Выбор типа стойки</h4>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Тип стойки шасси:</label>
-                        <select id="strut_type" class="form-select" onchange="toggleInputs()">
-                            <option value="1">Глава 1. Телескопическая стойка шасси</option>
-                            <option value="2">Глава 2. Рычажная / полурычажная стойка шасси</option>
-                            <option value="3">Глава 3. Стойка с выносным амортизатором</option>
-                        </select>
-                    </div>
-
-                    <h4 class="fw-bold text-dark mb-3 mt-2">2. Исходные данные (Предисловие)</h4>
-                    <div class="row g-2">
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">P_ст.пос (Н):</label>
-                            <input type="number" id="P_st_pos" class="form-control" value="45000">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">P_ст.взл (Н):</label>
-                            <input type="number" id="P_st_vzl" class="form-control" value="50000">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Взлетная скорость V_взл (км/ч):</label>
-                            <input type="number" id="V_vzl" class="form-control" value="250">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Посадочная скорость V_пос (км/ч):</label>
-                            <input type="number" id="V_pos" class="form-control" value="210">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Давление зарядки p0 (МПа):</label>
-                            <input type="number" step="0.1" id="p_0" class="form-control" value="6.0">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Соотношение G0/Gпос:</label>
-                            <input type="number" step="0.01" id="G0_Gpos" class="form-control" value="1.15">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Число колес n_кол:</label>
-                            <input type="number" id="n_wheels" class="form-control" value="2">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Нормируемая работа A* (Дж):</label>
-                            <input type="number" id="A_star" class="form-control" value="65000">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Коэф. полноты η:</label>
-                            <input type="number" step="0.01" id="eta" class="form-control" value="0.8">
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label class="form-label small">Коэф. нелинейности K:</label>
-                            <input type="number" step="0.01" id="K" class="form-control" value="0.8">
-                        </div>
-                    </div>
-
-                    <h4 class="fw-bold text-dark mb-3 mt-3">3. Параметры выбранной стойки</h4>
-                    <div id="type1_inputs">
-                        <div class="mb-2">
-                            <label class="form-label small">Угол наклона стойки θ (град):</label>
-                            <input type="number" id="theta_deg" class="form-control" value="0">
-                        </div>
-                    </div>
-                    <div id="type2_inputs" style="display:none;">
-                        <div class="mb-2">
-                            <label class="form-label small">Отношение плеч рычага b/a:</label>
-                            <input type="number" step="0.1" id="b_a" class="form-control" value="1.2">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small">Давление газа p0 (МПа):</label>
-                            <input type="number" step="0.5" id="p_0_lever" class="form-control" value="6.0">
-                        </div>
-                    </div>
-                    <div id="type3_inputs" style="display:none;">
-                        <div class="mb-2">
-                            <label class="form-label small">Отношение плеч рычага b/a:</label>
-                            <input type="number" step="0.1" id="b_a_ext" class="form-control" value="1.1">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small">Давление газа p0 (МПа):</label>
-                            <input type="number" step="0.5" id="p_0_ext" class="form-control" value="8.0">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary w-100 mt-4 fw-bold py-2" onclick="runCalculation()">Рассчитать шасси</button>
-                </div>
-            </div>
-
-            <!-- Right Column: Results & Graphs -->
-            <div class="col-lg-7">
-                <div class="card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="fw-bold text-dark m-0">Результаты расчета</h4>
-                        <div>
-                            <button id="export_excel_btn" class="btn btn-outline-success btn-sm" onclick="exportToExcel()" style="display:none;">Выгрузить в Excel</button>
-                        </div>
-                    </div>
-
-                    <div id="results_container">
-                        <p class="text-muted text-center py-4">Нажмите «Рассчитать шасси» для получения результатов.</p>
-                    </div>
-
-                    <div id="chart_container" class="mt-4" style="display:none;">
-                        <h5 class="fw-bold text-dark">Политропа сжатия газа (Шаг 5)</h5>
-                        <canvas id="polytropeChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <script>
-        let myChart = null;
-        let lastCalculationResults = null;
+    <div class="card">
+      <h2>Выбираемые параметры <span class="badge badge-blue">диапазоны</span></h2>
+      <div class="grid3">
+        <div>
+          <label>Sам — ход (мм)</label>
+          <div class="range-row"><input type="number" id="SamMin" value="300"><span>—</span><input type="number" id="SamMax" value="500"></div>
+        </div>
+        <div>
+          <label>Коэфф. Pнач</label>
+          <div class="range-row"><input type="number" id="coefMin" value="0.4" step="0.05"><span>—</span><input type="number" id="coefMax" value="0.6" step="0.05"></div>
+        </div>
+        <div>
+          <label>K</label>
+          <div class="range-row"><input type="number" id="Kmin" value="0.85" step="0.05"><span>—</span><input type="number" id="Kmax" value="0.95" step="0.05"></div>
+        </div>
+        <div>
+          <label>p₀ амортизатора (МПа)</label>
+          <div class="range-row"><input type="number" id="p0amMin" value="6" step="0.5"><span>—</span><input type="number" id="p0amMax" value="12" step="0.5"></div>
+        </div>
+        <div>
+          <label>δб стенки (мм)</label>
+          <div class="range-row"><input type="number" id="deltabMin" value="10"><span>—</span><input type="number" id="deltabMax" value="20"></div>
+        </div>
+        <div>
+          <label>hж max (мм)</label>
+          <div class="range-row"><input type="number" id="hzhMin" value="15"><span>—</span><input type="number" id="hzhMax" value="30"></div>
+        </div>
+        <div>
+          <label>hвб / hнб (мм)</label>
+          <div class="range-row"><input type="number" id="hbufMin" value="20"><span>—</span><input type="number" id="hbufMax" value="40"></div>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:.82rem;margin-top:.8rem" id="strutHint">
+        Для полурычажной стойки программа сама подберёт оптимальные Lk и Lам.
+      </p>
+    </div>
 
-        function toggleInputs() {
-            const type = document.getElementById('strut_type').value;
-            document.getElementById('type1_inputs').style.display = type == '1' ? 'block' : 'none';
-            document.getElementById('type2_inputs').style.display = type == '2' ? 'block' : 'none';
-            document.getElementById('type3_inputs').style.display = type == '3' ? 'block' : 'none';
-        }
+    <div class="card">
+      <h2>Каталог колёс <span class="badge badge-yellow">из каталога</span></h2>
+      <p style="color:var(--muted);font-size:.85rem">23 колеса. Перебор числа колёс: 1 / 2 / 4 / 6.</p>
+    </div>
 
-        function getFormData() {
-            const type = parseInt(document.getElementById('strut_type').value);
-            let p_0_gas = parseFloat(document.getElementById('p_0').value) * 1e6;
-            if (type == 2 && document.getElementById('p_0_lever').value) p_0_gas = parseFloat(document.getElementById('p_0_lever').value) * 1e6;
-            if (type == 3 && document.getElementById('p_0_ext').value) p_0_gas = parseFloat(document.getElementById('p_0_ext').value) * 1e6;
+    <div class="actions">
+      <button class="btn" id="solveBtn">Решить задачу</button>
+      <button class="btn btn-sec" onclick="location.reload()">Сбросить</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
 
-            return {
-                strut_type: type,
-                P_st_pos: parseFloat(document.getElementById('P_st_pos').value),
-                P_st_vzl: parseFloat(document.getElementById('P_st_vzl').value),
-                V_vzl: parseFloat(document.getElementById('V_vzl').value || 250),
-                V_pos: parseFloat(document.getElementById('V_pos').value || 210),
-                p_0: parseFloat(document.getElementById('p_0').value || 6.0),
-                G0_Gpos: parseFloat(document.getElementById('G0_Gpos').value || 1.15),
-                n_wheels: parseFloat(document.getElementById('n_wheels').value),
-                A_star: parseFloat(document.getElementById('A_star').value),
-                eta: parseFloat(document.getElementById('eta').value),
-                K: parseFloat(document.getElementById('K').value),
-                theta_deg: parseFloat(document.getElementById('theta_deg').value || 0),
-                b_a: parseFloat(document.getElementById('b_a').value || 1.2),
-                b_a_ext: parseFloat(document.getElementById('b_a_ext').value || 1.1),
-                p_0_gas: p_0_gas
-            };
-        }
+  <div id="result">
+    <div class="solution" id="sol"></div>
+    <div class="actions">
+      <button class="btn" id="exportBtn">Выгрузить в Excel</button>
+      <button class="btn" onclick="window.print()">Печать / PDF</button>
+      <button class="btn btn-sec" onclick="document.getElementById('result').style.display='none';document.getElementById('inputs').style.display='block'">Изменить данные</button>
+    </div>
+  </div>
+</main>
+<footer>aerotechlab.ton — помощник по курсовому проектированию шасси</footer>
 
-        function calculateLandingGearLocal(params) {
-            const strut_type = params.strut_type;
-            const P_st_pos = params.P_st_pos;
-            const P_st_vzl = params.P_st_vzl;
-            const A_star = params.A_star;
-            const G_vzl_G_pos = params.G0_Gpos || 1.15;
-            const eta = params.eta;
-            const K = params.K;
-            const k_gas = 1.2;
-            const f_safety = 1.5;
-            const d_p_k = 20.0;
+<script>
+const CATALOG = [
+  {id:1, size:"500×150", D:500, B:150, Pland:480, Pto:480, Vto:120, Vland:105, p0:5, Pmax:[3600,2150], dmax:[88,85], Amax:[136,75.1]},
+  {id:2, size:"520×125", D:520, B:125, Pland:1400, Pto:1400, Vto:280, Vland:270, p0:10, Pmax:[5200,2800], dmax:[66,62], Amax:[135,67]},
+  {id:3, size:"570×140", D:570, B:140, Pland:2000, Pto:2600, Vto:290, Vland:300, p0:10, Pmax:[7650,4000], dmax:[86.5,80], Amax:[290,140]},
+  {id:4, size:"600×155", D:600, B:155, Pland:2100, Pto:2600, Vto:280, Vland:300, p0:12.5, Pmax:[11300,4800], dmax:[100,91], Amax:[507,185]},
+  {id:5, size:"600×180", D:600, B:180, Pland:2560, Pto:2560, Vto:0, Vland:85, p0:10, Pmax:[9800,5200], dmax:[113,109], Amax:[480,245]},
+  {id:6, size:"660×160", D:660, B:160, Pland:2175, Pto:2900, Vto:275, Vland:205, p0:15, Pmax:[14000,5500], dmax:[100,91], Amax:[588,212]},
+  {id:7, size:"660×200", D:660, B:200, Pland:2850, Pto:4500, Vto:340, Vland:270, p0:14, Pmax:[15200,7300], dmax:[110,101], Amax:[731,313.4]},
+  {id:8, size:"700×200", D:700, B:200, Pland:1760, Pto:3500, Vto:370, Vland:280, p0:12.5, Pmax:[14000,6600], dmax:[106,101.5], Amax:[663,291]},
+  {id:9, size:"800×200", D:800, B:200, Pland:4300, Pto:5500, Vto:390, Vland:320, p0:14, Pmax:[21800,8500], dmax:[123.5,119], Amax:[1140,425]},
+  {id:10, size:"800×225", D:800, B:225, Pland:2980, Pto:4200, Vto:300, Vland:220, p0:13, Pmax:[20900,12950], dmax:[126,119], Amax:[1120,640]},
+  {id:11, size:"800×260", D:800, B:260, Pland:2400, Pto:2400, Vto:150, Vland:90, p0:7.5, Pmax:[17000,11450], dmax:[180.5,175], Amax:[1340,870]},
+  {id:12, size:"880×230", D:880, B:230, Pland:5200, Pto:7400, Vto:410, Vland:340, p0:16, Pmax:[24100,13500], dmax:[121.5,114], Amax:[1274,669]},
+  {id:13, size:"900×300", D:900, B:300, Pland:5000, Pto:5000, Vto:190, Vland:175, p0:10, Pmax:[27800,15200], dmax:[207,199], Amax:[2474,1300]},
+  {id:14, size:"930×305", D:930, B:305, Pland:6200, Pto:7850, Vto:300, Vland:260, p0:10, Pmax:[25100,13800], dmax:[177,171], Amax:[1935,1026]},
+  {id:15, size:"950×350", D:950, B:350, Pland:4700, Pto:4800, Vto:200, Vland:200, p0:10, Pmax:[30000,16400], dmax:[197,193], Amax:[2482,1331]},
+  {id:16, size:"1050×300", D:1050, B:300, Pland:6900, Pto:7250, Vto:240, Vland:240, p0:10, Pmax:[29400,13750], dmax:[188,176.5], Amax:[2349,1175]},
+  {id:17, size:"1100×330", D:1100, B:330, Pland:7700, Pto:9500, Vto:330, Vland:260, p0:11, Pmax:[39000,27000], dmax:[197,191], Amax:[3300,2200]},
+  {id:18, size:"1230×260", D:1230, B:260, Pland:5810, Pto:5810, Vto:60, Vland:80, p0:17, Pmax:[42400,25000], dmax:[150.5,145], Amax:[2730,1559]},
+  {id:19, size:"1300×360", D:1300, B:360, Pland:11000, Pto:15200, Vto:400, Vland:320, p0:16, Pmax:[59750,32000], dmax:[201.5,193], Amax:[5312,2717]},
+  {id:20, size:"1450×450", D:1450, B:450, Pland:13000, Pto:19470, Vto:330, Vland:270, p0:13, Pmax:[77400,49100], dmax:[276,269], Amax:[9280,5679]},
+  {id:21, size:"1450×580", D:1450, B:580, Pland:10000, Pto:10000, Vto:250, Vland:240, p0:6.5, Pmax:[53500,32000], dmax:[365,356], Amax:[8750,5000]},
+  {id:22, size:"1500×500", D:1500, B:500, Pland:16000, Pto:22000, Vto:300, Vland:280, p0:12.5, Pmax:[96500,40000], dmax:[320,308], Amax:[12969,5174]},
+  {id:23, size:"1750×730", D:1750, B:730, Pland:17000, Pto:18000, Vto:60, Vland:80, p0:5, Pmax:[52000,45750], dmax:[396,386], Amax:[10500,7312]}
+];
 
-            const A_max = A_star * G_vzl_G_pos;
+let lastResult = null;
 
-            let stroke_ratio = 2.5;
-            let P_pm_max, delta_pm, delta_am;
+function $(id){ return document.getElementById(id); }
+function num(id){ return parseFloat($(id).value); }
 
-            if (strut_type === 1) {
-                stroke_ratio = 2.5;
-                const theta_rad = (params.theta_deg * Math.PI) / 180.0;
-                const cos_t = Math.cos(theta_rad);
-                const coeff_work = (0.5 * K) / d_p_k + (stroke_ratio * cos_t) / (eta * d_p_k);
-                P_pm_max = Math.sqrt((A_max / coeff_work) * 1000);
-                delta_pm = P_pm_max / d_p_k;
-                delta_am = delta_pm * stroke_ratio;
-            } else if (strut_type === 2) {
-                stroke_ratio = 2.0;
-                const b_a = params.b_a;
-                const coeff_work = (0.5 * K) / d_p_k + (stroke_ratio / b_a) / (eta * d_p_k);
-                P_pm_max = Math.sqrt((A_max / coeff_work) * 1000);
-                delta_pm = P_pm_max / d_p_k;
-                delta_am = delta_pm * stroke_ratio;
-            } else {
-                stroke_ratio = 1.8;
-                const b_a_ext = params.b_a_ext;
-                const coeff_work = (0.5 * K) / d_p_k + (stroke_ratio / b_a_ext) / (eta * d_p_k);
-                P_pm_max = Math.sqrt((A_max / coeff_work) * 1000);
-                delta_pm = P_pm_max / d_p_k;
-                delta_am = delta_pm * stroke_ratio;
-            }
+document.getElementById('strutType').addEventListener('change', function(){
+  const t = this.value;
+  $('strutHint').textContent = t === 'telescopic'
+    ? 'Телескопическая стойка: принимается Lk = Lам (передаточное отношение = 1).'
+    : 'Полурычажная стойка: программа сама подберёт оптимальные Lk и Lам.';
+});
 
-            const n_y_calc = P_pm_max / P_st_pos;
-            const ap25_passed = n_y_calc <= 3.5;
+function wheelSI(w, idx){
+  return { Pmd: w.Pmax[idx]*10, dmd: w.dmax[idx], Amd: w.Amax[idx]*10, p: w.p0 };
+}
+function roundUpEven(x){
+  let v = Math.ceil(x);
+  if(v % 2 !== 0) v++;
+  return v;
+}
 
-            const P_nom = (0.4 + 0.1 * eta) * P_pm_max;
-            const p_0_gas = params.p_0_gas;
-            const d_rod = Math.sqrt((4 * P_nom) / (Math.PI * p_0_gas)) * 1000;
-            const D_cyl = d_rod + (strut_type === 1 ? 30 : strut_type === 2 ? 36 : 40);
-            const p_max = P_pm_max / (Math.PI * Math.pow(d_rod / 2000, 2));
-            const V_0 = (P_pm_max * delta_am) / 1000;
+function calcVariant(p){
+  const {Ppos,Ae,G0G,Nkol,eta,p0tire,Lk,Lam,K,Sam,coef,p0am,pmax,k,deltab,hzhmax,wA,wB} = p;
+  const p1=wA.p, p2=wB.p;
+  let Pmd, dmd, Amd;
+  if(Math.abs(p1-p2)<1e-9){
+    // Одно колесо — берём основные характеристики (точка 0)
+    Pmd = wA.Pmd; dmd = wA.dmd; Amd = wA.Amd;
+  } else {
+    Pmd = ((p0tire-p2)*(wA.Pmd-wB.Pmd)/(p1-p2))+wB.Pmd;
+    dmd = ((p0tire-p2)*(wA.dmd-wB.dmd)/(p1-p2))+wB.dmd;
+    Amd = ((p0tire-p2)*(wA.Amd-wB.Amd)/(p1-p2))+wB.Amd;
+  }
+  if(Pmd<=0||dmd<=0) return null;
 
-            const polytrope_points = [];
-            const num_steps = 10;
-            const A_rod = (Math.PI * Math.pow(d_rod, 2)) / 4.0;
-            for (let i = 0; i <= num_steps; i++) {
-                const delta_i = (delta_am / num_steps) * i;
-                const vol_i = Math.max(V_0 - A_rod * delta_i, V_0 * 0.15);
-                const p_i = p_0_gas * Math.pow(V_0 / vol_i, k_gas);
-                const force_i = p_i * (A_rod / 1e6);
-                polytrope_points.push({
-                    delta_mm: delta_i.toFixed(2),
-                    pressure_MPa: (p_i / 1e6).toFixed(2),
-                    force_kN: (force_i / 1000).toFixed(2)
-                });
-            }
+  const AmaxJ = Ae*G0G;
+  const Amax = AmaxJ*1000;
+  const C1 = 0.5*dmd*eta*Nkol/Pmd;
+  const ratio = (Lk===0 || Lam===0) ? 1 : (Lk/Lam);
+  const C2 = ratio*Sam*K*Nkol;
+  const disc = C2*C2 + 4*C1*Amax;
+  if(disc<0) return null;
+  const Ppn = (-C2 + Math.sqrt(disc))/(2*C1);
+  const ny = Ppn*Nkol/Ppos;
+  if(ny<2 || ny>3.5) return null;
 
-            const P_y_land = P_pm_max * f_safety;
-            const P_y_takeoff = P_st_vzl * n_y_calc * f_safety;
-            const P_z_side = 0.25 * P_y_land;
+  const Pnach = coef*Ppos;
+  let dst = Math.ceil(2*Math.sqrt(Pnach/(Math.PI*p0am)));
+  dst = roundUpEven(dst);
+  const Fst = Math.PI*dst*dst/4;
+  const Dcil = dst + 2*deltab;
+  const Fcil = Math.PI*Dcil*Dcil/4;
+  const factor = 1 - Math.pow(p0am/pmax, 1/k);
+  if(factor<=0.01) return null;
+  const h0 = Math.ceil((Fst*Sam/(Fcil*factor))/10)*10;
+  const dh = Fst*Sam/Fcil;
+  const hmax = h0 - dh;
+  if(hmax<=0) return null;
+  const hzh0 = Sam*((Fcil-Fst)/Fcil) - hzhmax;
+  const V0 = Fcil*h0;
+  const Agas = (p0am*V0)/(k-1)*(Math.pow(pmax/p0am,(k-1)/k)-1)/1000;
+  const share = Agas/AmaxJ*100;
 
-            const strut_names = [
-                'Телескопическая стойка (Глава 1)',
-                'Рычажная / Полурычажная стойка (Глава 2)',
-                'Стойка с выносным амортизатором (Глава 3)'
-            ];
+  return {Pmd,dmd,Amd,dpred:dmd/0.95,AmaxJ,C1,C2,Ppn,ny,Pnach,dst,Fst,Dcil,Fcil,h0,dh,hmax,hzh0,Agas,share,Sam,coef,K,Nkol,Lk,Lam,p0am,pmax,k,deltab,ratio};
+}
 
-            return {
-                params: params,
-                strut_type: strut_type,
-                strut_name: strut_names[strut_type - 1],
-                steps: {
-                    step1: {
-                        title: 'Шаг 1. Максимальная работа и распределение энергии',
-                        A_max_J: A_max.toFixed(2),
-                        G_vzl_G_pos: G_vzl_G_pos
-                    },
-                    step2_3: {
-                        title: 'Шаг 2-3. Уравнение совместности и эксплуатационная перегрузка',
-                        delta_pm_mm: delta_pm.toFixed(2),
-                        delta_am_mm: delta_am.toFixed(2),
-                        P_pm_max_kN: (P_pm_max / 1000).toFixed(2),
-                        n_y_calc: n_y_calc.toFixed(3),
-                        ap25_passed: ap25_passed,
-                        ap25_limit: 3.5
-                    },
-                    step4: {
-                        title: 'Шаг 4. Геометрические параметры амортизатора',
-                        d_rod_mm: d_rod.toFixed(1),
-                        D_cyl_mm: D_cyl.toFixed(1),
-                        p_max_MPa: (p_max / 1e6).toFixed(2),
-                        V_0_cm3: (V_0 / 1000).toFixed(1)
-                    },
-                    step6: {
-                        title: 'Шаг 6. Расчётные случаи нагружения (с учётом f_безопасности = 1.5 по АП-25)',
-                        P_y_land_kN: (P_y_land / 1000).toFixed(2),
-                        P_y_takeoff_kN: (P_y_takeoff / 1000).toFixed(2),
-                        P_z_side_kN: (P_z_side / 1000).toFixed(2)
+function solve(){
+  const status = $('status');
+  const btn = $('solveBtn');
+  status.textContent = 'Идёт подбор...';
+  btn.disabled = true;
+
+  setTimeout(function(){
+    try{
+      const Ppos=num('Ppos'), Ae=num('Ae'), G0G=num('G0G'), eta=num('eta'), p0tire=num('p0tire');
+      const pmax=num('pmax'), k=num('k');
+      const strutType = $('strutType').value;
+      const SamMin=num('SamMin'), SamMax=num('SamMax');
+      const coefMin=num('coefMin'), coefMax=num('coefMax');
+      const Kmin=num('Kmin'), Kmax=num('Kmax');
+      const p0amMin=num('p0amMin'), p0amMax=num('p0amMax');
+      const deltabMin=num('deltabMin'), deltabMax=num('deltabMax');
+      const hzhMin=num('hzhMin'), hzhMax=num('hzhMax');
+      const hzhmax = (hzhMin+hzhMax)/2;
+
+      let best=null, bestScore=-Infinity;
+      const Nopts=[1,2,4,6];
+
+      const LkList = strutType==='telescopic' ? [400] : [800,900,1000,1100,1200];
+      const LamList = strutType==='telescopic' ? [400] : [300,350,400,450,500];
+
+      const Pvzl = num('Pvzl');
+      const Vpos = num('Vpos');
+      const Vvzl = num('Vvzl');
+
+      for(const Nkol of Nopts){
+        const Ppos_daN = Ppos / 10 / Nkol;
+        const Pvzl_daN = Pvzl / 10 / Nkol;
+
+        for(let i=0; i<CATALOG.length; i++){
+          const w = CATALOG[i];
+          // Колесо должно быть не слабее по всем 4 параметрам
+          if(w.Pland < Ppos_daN || w.Pto < Pvzl_daN || w.Vland < Vpos || w.Vto < Vvzl) continue;
+
+          // Берём характеристики колеса (точка 0; при необходимости можно усреднить)
+          const wData = wheelSI(w, 0);
+          // Для совместимости с calcVariant передаём одну и ту же точку как A и B
+          const wA = wData;
+          const wB = { Pmd: w.Pmax[1]*10, dmd: w.dmax[1], Amd: w.Amax[1]*10, p: w.p0 };
+
+          for(let Sam=SamMin; Sam<=SamMax; Sam+=50){
+            for(let coef=coefMin; coef<=coefMax+1e-9; coef+=0.1){
+              for(let K=Kmin; K<=Kmax+1e-9; K+=0.05){
+                for(const Lk of LkList){
+                  for(const Lam of LamList){
+                    for(let p0am=p0amMin; p0am<=p0amMax+1e-9; p0am+=2){
+                      for(let deltab=deltabMin; deltab<=deltabMax; deltab+=5){
+                        const r = calcVariant({Ppos,Ae,G0G,Nkol,eta,p0tire,Lk,Lam,K,Sam,coef,p0am,pmax,k,deltab,hzhmax,wA,wB});
+                        if(!r) continue;
+                        // Оценка: доля газа + близость ny к 2.5 − штраф за лишние колёса
+                        // Небольшой бонус более «лёгкому» колесу (меньший размер)
+                        const score = r.share*10 + (3.5-Math.abs(r.ny-2.5))*40 - Nkol*8 - w.D*0.01;
+                        if(score > bestScore){
+                          bestScore = score;
+                          best = {...r, wheelId: w.id, size: w.size, D: w.D, B: w.B, strutType};
+                        }
+                      }
                     }
-                },
-                polytrope_points: polytrope_points
-            };
-        }
-
-        async function runCalculation() {
-            const payload = getFormData();
-            let resData;
-            try {
-                const res = await fetch('/calculate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    resData = data.data;
-                    resData.params = payload;
-                } else {
-                    resData = calculateLandingGearLocal(payload);
+                  }
                 }
-            } catch (e) {
-                resData = calculateLandingGearLocal(payload);
+              }
             }
-            lastCalculationResults = resData;
-            renderResults(resData);
+          }
         }
+      }
 
-        function renderResults(res) {
-            const steps = res.steps;
-            let html = `<h5 class="text-primary fw-bold mb-3">${res.strut_name}</h5>`;
+      btn.disabled = false;
+      status.textContent = '';
 
-            // Step 1
-            html += `<div class="mb-3 p-3 bg-light rounded">
-                <span class="step-badge">${steps.step1.title}</span>
-                <div class="mt-2">Макс. работа A_max: <b>${steps.step1.A_max_J} Дж</b></div>
-            </div>`;
+      if(!best){
+        alert('Не найдено решение с ny ∈ [2; 3.5]. Расширьте диапазоны.');
+        return;
+      }
 
-            // Step 2-3
-            const apBadge = steps.step2_3.ap25_passed ?
-                '<span class="badge bg-success">Соответствует АП-25 (ny ≤ 3.5)</span>' :
-                '<span class="badge bg-danger">Превышение АП-25!</span>';
-            html += `<div class="mb-3 p-3 bg-light rounded">
-                <span class="step-badge">${steps.step2_3.title}</span>
-                <div class="mt-2">Ход пневматика: <b>${steps.step2_3.delta_pm_mm} мм</b></div>
-                <div>Ход амортизатора: <b>${steps.step2_3.delta_am_mm} мм</b></div>
-                <div>Макс. усилие P_пм^max: <b>${steps.step2_3.P_pm_max_kN} кН</b></div>
-                <div>Эксплуатационная перегрузка n_y^расч: <b>${steps.step2_3.n_y_calc}</b> ${apBadge}</div>
-            </div>`;
+      lastResult = best;
 
-            // Step 4
-            html += `<div class="mb-3 p-3 bg-light rounded">
-                <span class="step-badge">${steps.step4.title}</span>
-                <div class="mt-2">Диаметр штока d_шток: <b>${steps.step4.d_rod_mm} мм</b></div>
-                <div>Диаметр цилиндра D_цил: <b>${steps.step4.D_cyl_mm} мм</b></div>
-                <div>Макс. давление p_max: <b>${steps.step4.p_max_MPa} МПа</b></div>
-                <div>Объем газовой камеры V_0: <b>${steps.step4.V_0_cm3} см³</b></div>
-            </div>`;
+      const strutName = best.strutType==='telescopic' ? 'Телескопическая' : 'Полурычажная';
+      const html = `
+        <h2>Решение задачи</h2>
+        <h3>1. Исходные данные</h3>
+        <table>
+          <tr><th>Параметр</th><th>Значение</th><th>Ед.</th></tr>
+          <tr><td>Pпос</td><td>${Ppos}</td><td>Н</td></tr>
+          <tr><td>Aэ</td><td>${Ae}</td><td>Дж</td></tr>
+          <tr><td>G₀/Gпос</td><td>${G0G}</td><td>—</td></tr>
+          <tr><td>p₀ колеса</td><td>${p0tire}</td><td>×10⁶ Па</td></tr>
+          <tr><td>η</td><td>${eta}</td><td>—</td></tr>
+          <tr><td>pmax</td><td>${pmax}</td><td>МПа</td></tr>
+          <tr><td>k</td><td>${k}</td><td>—</td></tr>
+          <tr><td>Тип стойки</td><td>${strutName}</td><td>—</td></tr>
+        </table>
+        <h3>2. Выбранные параметры</h3>
+        <table>
+          <tr><th>Параметр</th><th>Значение</th></tr>
+          <tr><td>Nкол</td><td><b>${best.Nkol}</b></td></tr>
+          <tr><td>Колесо</td><td>№${best.wheelId} (${best.size}, D=${best.D} мм, B=${best.B} мм)</td></tr>
+          <tr><td>Sам</td><td><b>${best.Sam} мм</b></td></tr>
+          <tr><td>Коэфф. Pнач</td><td><b>${best.coef.toFixed(2)}</b></td></tr>
+          <tr><td>K</td><td><b>${best.K.toFixed(2)}</b></td></tr>
+          <tr><td>Lk</td><td><b>${best.Lk} мм</b></td></tr>
+          <tr><td>Lам</td><td><b>${best.Lam} мм</b></td></tr>
+          <tr><td>p₀ аморт.</td><td>${best.p0am} МПа</td></tr>
+          <tr><td>δб</td><td>${best.deltab} мм</td></tr>
+        </table>
+        <h3>3. Характеристики колеса</h3>
+        <div class="formula">X = [(p₀ − p₂)·(X₁ − X₂)/(p₁ − p₂)] + X₂</div>
+        <p>Pмд = <b>${best.Pmd.toFixed(0)} Н</b> &nbsp; δмд = <b>${best.dmd.toFixed(2)} мм</b> &nbsp; Aмд = <b>${best.Amd.toFixed(0)} Дж</b></p>
+        <p>δпред.разр = <b>${best.dpred.toFixed(2)} мм</b></p>
+        <h3>4. Энергия и перегрузка</h3>
+        <div class="formula">Aмах = Aэ · (G₀/Gпос) · 1000 = ${(best.AmaxJ*1000).toLocaleString()} Н·мм</div>
+        <div class="formula">C₁ = ${best.C1.toFixed(7)} &nbsp; C₂ = ${best.C2.toFixed(0)}</div>
+        <div class="answer">Pпн max = ${best.Ppn.toFixed(0)} Н</div>
+        <div class="answer">ny max = <b>${best.ny.toFixed(3)}</b> (2–3.5 ✓)</div>
+        <h3>5. Амортизатор</h3>
+        <p>Pнач = ${best.Pnach.toFixed(0)} Н</p>
+        <div class="formula">dшт = ${best.dst} мм (чётное)</div>
+        <p>Dцил = ${best.Dcil} мм &nbsp; Fшт = ${best.Fst.toFixed(0)} мм² &nbsp; Fцил = ${best.Fcil.toFixed(0)} мм²</p>
+        <p>h₀ = <b>${best.h0} мм</b> &nbsp; Δhгаза = ${best.dh.toFixed(1)} мм &nbsp; hmax = ${best.hmax.toFixed(1)} мм</p>
+        <h3>6. Работа газа</h3>
+        <div class="formula">Aгаза = (p₀·V₀)/(k−1)·[(pmax/p₀)^((k−1)/k)−1]</div>
+        <div class="answer">Aгаза = <b>${best.Agas.toFixed(0)} Дж</b> (доля ${best.share.toFixed(1)} %)</div>
+        <h3>7. Итоговая таблица</h3>
+        <table>
+          <tr><th>Параметр</th><th>Значение</th><th>Ед.</th></tr>
+          <tr><td>Nкол</td><td>${best.Nkol}</td><td>шт</td></tr>
+          <tr><td>Колесо</td><td>№${best.wheelId} (${best.size}, D=${best.D} мм, B=${best.B} мм)</td><td>—</td></tr>
+          <tr><td>Тип стойки</td><td>${strutName}</td><td>—</td></tr>
+          <tr><td>Pмд</td><td>${best.Pmd.toFixed(0)}</td><td>Н</td></tr>
+          <tr><td>δмд</td><td>${best.dmd.toFixed(2)}</td><td>мм</td></tr>
+          <tr><td>Pпн max</td><td>${best.Ppn.toFixed(0)}</td><td>Н</td></tr>
+          <tr><td><b>ny max</b></td><td><b>${best.ny.toFixed(3)}</b></td><td>—</td></tr>
+          <tr><td>Sам</td><td>${best.Sam}</td><td>мм</td></tr>
+          <tr><td>Lk / Lам</td><td>${best.Lk} / ${best.Lam}</td><td>мм</td></tr>
+          <tr><td>dшт</td><td>${best.dst}</td><td>мм</td></tr>
+          <tr><td>Dцил</td><td>${best.Dcil}</td><td>мм</td></tr>
+          <tr><td>h₀</td><td>${best.h0}</td><td>мм</td></tr>
+          <tr><td>Aгаза</td><td>${best.Agas.toFixed(0)}</td><td>Дж</td></tr>
+          <tr><td>Доля газа</td><td>${best.share.toFixed(1)} %</td><td>—</td></tr>
+        </table>
+      `;
+      $('sol').innerHTML = html;
+      $('inputs').style.display = 'none';
+      $('result').style.display = 'block';
+      window.scrollTo({top:0,behavior:'smooth'});
+    }catch(e){
+      btn.disabled = false;
+      status.textContent = '';
+      alert('Ошибка: '+e.message);
+      console.error(e);
+    }
+  }, 30);
+}
 
-            // Step 6
-            html += `<div class="mb-3 p-3 bg-light rounded">
-                <span class="step-badge">${steps.step6.title}</span>
-                <div class="mt-2">Посадочный удар P_y^расч: <b>${steps.step6.P_y_land_kN} кН</b></div>
-                <div>Разбег при взлете P_y_взл^расч: <b>${steps.step6.P_y_takeoff_kN} кН</b></div>
-                <div>Боковой удар P_z^расч: <b>${steps.step6.P_z_side_kN} кН</b></div>
-            </div>`;
+function exportExcel(){
+  if(!lastResult){ alert('Сначала выполните расчёт'); return; }
+  const r = lastResult;
+  const strutName = r.strutType==='telescopic' ? 'Телескопическая' : 'Полурычажная';
+  const rows = [
+    ['Параметр','Значение','Единица'],
+    ['Pпос', num('Ppos'), 'Н'],
+    ['Aэ', num('Ae'), 'Дж'],
+    ['G0/Gпос', num('G0G'), '—'],
+    ['p0_колеса', num('p0tire'), '×10^6 Па'],
+    ['eta', num('eta'), '—'],
+    ['pmax', r.pmax, 'МПа'],
+    ['k', r.k, '—'],
+    ['Тип_стойки', strutName, '—'],
+    ['Nкол', r.Nkol, 'шт'],
+    ['Колесо', '№'+r.wheelId+' ('+r.size+', D='+r.D+' мм, B='+r.B+' мм)', '—'],
+    ['Sам', r.Sam, 'мм'],
+    ['Коэфф_Pнач', r.coef, '—'],
+    ['K', r.K, '—'],
+    ['Lk', r.Lk, 'мм'],
+    ['Lам', r.Lam, 'мм'],
+    ['p0_амортизатора', r.p0am, 'МПа'],
+    ['δб', r.deltab, 'мм'],
+    ['Pмд', Math.round(r.Pmd), 'Н'],
+    ['δмд', r.dmd.toFixed(2), 'мм'],
+    ['Aмд', Math.round(r.Amd), 'Дж'],
+    ['δпред_разр', r.dpred.toFixed(2), 'мм'],
+    ['Aмах', Math.round(r.AmaxJ), 'Дж'],
+    ['C1', r.C1.toFixed(7), '—'],
+    ['C2', Math.round(r.C2), '—'],
+    ['Pпн_max', Math.round(r.Ppn), 'Н'],
+    ['ny_max', r.ny.toFixed(3), '—'],
+    ['Pнач', Math.round(r.Pnach), 'Н'],
+    ['dшт', r.dst, 'мм'],
+    ['Dцил', r.Dcil, 'мм'],
+    ['Fшт', Math.round(r.Fst), 'мм²'],
+    ['Fцил', Math.round(r.Fcil), 'мм²'],
+    ['h0', r.h0, 'мм'],
+    ['Δhгаза', r.dh.toFixed(1), 'мм'],
+    ['hmax', r.hmax.toFixed(1), 'мм'],
+    ['Aгаза', Math.round(r.Agas), 'Дж'],
+    ['Доля_газа', r.share.toFixed(1), '%']
+  ];
+  const bom = '\uFEFF';
+  const csv = bom + rows.map(row => row.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Reshenie_shassi_aerotechlab.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
-            document.getElementById('results_container').innerHTML = html;
-            document.getElementById('chart_container').style.display = 'block';
-            document.getElementById('export_excel_btn').style.display = 'inline-block';
-
-            renderChart(res.polytrope_points);
-        }
-
-        function renderChart(points) {
-            const ctx = document.getElementById('polytropeChart').getContext('2d');
-            const labels = points.map(p => p.delta_mm + ' мм');
-            const pressures = points.map(p => p.pressure_MPa);
-            const forces = points.map(p => p.force_kN);
-
-            if (myChart) myChart.destroy();
-
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Давление (МПа)', data: pressures, borderColor: '#2563eb', fill: false },
-                        { label: 'Усилие (кН)', data: forces, borderColor: '#16a34a', fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { title: { display: true, text: 'Ход амортизатора (мм)' } }
-                    }
-                }
-            });
-        }
-
-        function exportToExcel() {
-            if (!lastCalculationResults) return;
-            const res = lastCalculationResults;
-            const params = res.params || {};
-            const steps = res.steps;
-
-            const wb = XLSX.utils.book_new();
-
-            // Sheet 1: Summary / Results
-            const summaryData = [
-                ["Параметр / Результат", "Значение", "Ед. изм."],
-                ["Тип стойки шасси", res.strut_name, ""],
-                ["", "", ""],
-                ["--- ИСХОДНЫЕ ДАННЫЕ ---", "", ""],
-                ["P_ст.пос", params.P_st_pos, "Н"],
-                ["P_ст.взл", params.P_st_vzl, "Н"],
-                ["Взлетная скорость V_взл", params.V_vzl, "км/ч"],
-                ["Посадочная скорость V_пос", params.V_pos, "км/ч"],
-                ["Давление зарядки p0", params.p_0, "МПа"],
-                ["Соотношение G0/Gпос", params.G0_Gpos, ""],
-                ["Число колес n_кол", params.n_wheels, ""],
-                ["Нормируемая работа A*", params.A_star, "Дж"],
-                ["Коэффициент полноты η", params.eta, ""],
-                ["Коэффициент нелинейности K", params.K, ""],
-                ["", "", ""],
-                ["--- РЕЗУЛЬТАТЫ РАСЧЕТА ---", "", ""],
-                ["Макс. работа A_max", steps.step1.A_max_J, "Дж"],
-                ["Ход пневматика", steps.step2_3.delta_pm_mm, "мм"],
-                ["Ход амортизатора", steps.step2_3.delta_am_mm, "мм"],
-                ["Макс. усилие P_пм^max", steps.step2_3.P_pm_max_kN, "кН"],
-                ["Эксплуатационная перегрузка n_y^расч", steps.step2_3.n_y_calc, ""],
-                ["Соответствие АП-25 (ny <= 3.5)", steps.step2_3.ap25_passed ? "Да" : "Нет", ""],
-                ["Диаметр штока d_шток", steps.step4.d_rod_mm, "мм"],
-                ["Диаметр цилиндра D_цил", steps.step4.D_cyl_mm, "мм"],
-                ["Макс. давление p_max", steps.step4.p_max_MPa, "МПа"],
-                ["Объем газовой камеры V_0", steps.step4.V_0_cm3, "см³"],
-                ["Посадочный удар P_y^расч", steps.step6.P_y_land_kN, "кН"],
-                ["Разбег при взлете P_y_взл^расч", steps.step6.P_y_takeoff_kN, "кН"],
-                ["Боковой удар P_z^расч", steps.step6.P_z_side_kN, "кН"]
-            ];
-
-            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-            XLSX.utils.book_append_sheet(wb, wsSummary, "Результаты расчёта");
-
-            // Sheet 2: Polytrope Points
-            const polytropeHeader = [["Ход амортизатора (мм)", "Давление (МПа)", "Усилие (кН)"]];
-            const polytropeRows = res.polytrope_points.map(p => [
-                parseFloat(p.delta_mm),
-                parseFloat(p.pressure_MPa),
-                parseFloat(p.force_kN)
-            ]);
-            const wsPolytrope = XLSX.utils.aoa_to_sheet(polytropeHeader.concat(polytropeRows));
-            XLSX.utils.book_append_sheet(wb, wsPolytrope, "Политропа сжатия");
-
-            XLSX.writeFile(wb, "Расчет_шасси_результаты.xlsx");
-        }
-    </script>
+$('solveBtn').addEventListener('click', solve);
+$('exportBtn').addEventListener('click', exportExcel);
+</script>
 </body>
 </html>
